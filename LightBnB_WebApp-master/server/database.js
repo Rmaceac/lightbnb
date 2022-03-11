@@ -9,11 +9,6 @@ const pool = new Pool({
   database: 'lightbnb'
 });
 
-pool.query(`SELECT title FROM properties LIMIT 10;`)
-  .then(response => {
-
-  });
-
 /// Users
 
 /**
@@ -194,9 +189,68 @@ exports.getAllProperties = getAllProperties;
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  
+  /* eslint-disable */
+  const { 
+    owner_id,
+    title,
+    description,
+    thumbnail_photo_url,
+    cover_photo_url,
+    cost_per_night,
+    street,
+    city,
+    province,
+    post_code,
+    country,
+    parking_spaces,
+    number_of_bathrooms,
+    number_of_bedrooms
+  } = property;
+
+  const params = [
+    owner_id,
+    title,
+    description,
+    thumbnail_photo_url,
+    cover_photo_url,
+    cost_per_night,
+    street,
+    city,
+    province,
+    post_code,
+    country,
+    parking_spaces,
+    number_of_bathrooms,
+    number_of_bedrooms
+  ];
+
+  /* eslint-enable */
+  // function to list all property columns required for insert query
+  // const propertyColumns = () => {
+  //   let result = "";
+  //   for (const key in property) {
+  //     result += `${key}, `;
+  //   }
+  //   // console.log("Result:", result);
+  //   // slices off the final comma and space from the result string.
+  //   return result.slice(0, -2);
+  // };
+
+  const queryString =
+  `INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, cost_per_night, street, city, province, post_code, country, parking_spaces, number_of_bathrooms, number_of_bedrooms) 
+  VALUES (${params}) 
+  RETURNING *;`;
+  console.log("queryString:", queryString, "params:", params);
+
+  return pool.query(queryString, params)
+    .then((result) => {
+      console.log(result.rows);
+      return result.rows;
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+
 };
 exports.addProperty = addProperty;
